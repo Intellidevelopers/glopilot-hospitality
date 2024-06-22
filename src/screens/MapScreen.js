@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Button, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -28,16 +28,17 @@ const MapScreen = () => {
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
       setRegion({
-        ...region,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
       });
     })();
   }, []);
 
   return (
     <View style={styles.container}> 
-         <View style={styles.header}>
+      <View style={styles.header}>
         <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
           <Ionicons name={"arrow-back-outline"} color={colors.secondary} size={25} />
         </TouchableOpacity>
@@ -57,15 +58,17 @@ const MapScreen = () => {
         region={region}
         onRegionChangeComplete={setRegion}
       >
-        <Marker
-          coordinate={{ latitude: region.latitude, longitude: region.longitude }}
-          draggable
-          onDragEnd={(e) => setRegion({
-            ...region,
-            latitude: e.nativeEvent.coordinate.latitude,
-            longitude: e.nativeEvent.coordinate.longitude,
-          })}
-        />
+        {location && (
+          <Marker
+            coordinate={{ latitude: region.latitude, longitude: region.longitude }}
+            draggable
+            onDragEnd={(e) => setRegion({
+              ...region,
+              latitude: e.nativeEvent.coordinate.latitude,
+              longitude: e.nativeEvent.coordinate.longitude,
+            })}
+          />
+        )}
       </MapView>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AmenityScreen')}>
         <Text style={styles.buttonText}>Yes, that's right</Text>

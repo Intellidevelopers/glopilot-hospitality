@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, EvilIcons, AntDesign } from '@expo/vector-icons';
 import { colors } from '../utils/colors';
-
-// Import the cover image from the assets folder
 import defaultCoverImage from '../assets/Vector.png';
 
 const CreateProfileScreen = ({ navigation }) => {
-  const [coverPhoto, setCoverPhoto] = useState(defaultCoverImage); // Use the imported image as the default cover photo
-  const [caption, setCaption] = useState('');
+  const [coverPhoto, setCoverPhoto] = useState(defaultCoverImage); // Default cover photo
   const [photos, setPhotos] = useState([]);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newLanguage, setNewLanguage] = useState('');
 
-  const pickCoverImage = async () => {
+  const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
+      Alert.alert('Permission required', 'Sorry, we need camera roll permissions to make this work!');
+      return false;
     }
+    return true;
+  };
+
+  const pickCoverImage = async () => {
+    const hasPermission = await requestPermission();
+    if (!hasPermission) return;
 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -28,16 +32,13 @@ const CreateProfileScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setCoverPhoto({ uri: result.uri });
+      setCoverPhoto({ uri: result.assets[0].uri });
     }
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
-    }
+    const hasPermission = await requestPermission();
+    if (!hasPermission) return;
 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -47,12 +48,8 @@ const CreateProfileScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setPhotos([...photos, result.uri]);
+      setPhotos([...photos, result.assets[0].uri]);
     }
-  };
-
-  const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
   };
 
   return (
@@ -67,19 +64,18 @@ const CreateProfileScreen = ({ navigation }) => {
 
       <Text style={styles.title}>Add your profile photo</Text>
       <Text style={styles.subtitle}>
-      Add a photo to personalize your profile.
+        Add a photo to personalize your profile.
       </Text>
       
       <TouchableOpacity onPress={pickCoverImage} style={styles.imagePicker}>
         <Image source={coverPhoto} style={styles.coverPhoto} />
       </TouchableOpacity>
       
-      <TouchableOpacity  onPress={pickImage}>
-      <View style={styles.uploadButtonText}>
+      <TouchableOpacity onPress={pickCoverImage} style={styles.uploadButton}>
+        <View style={styles.uploadButtonText}>
           <Ionicons name="cloud-upload-outline" size={24} color="black" />
           <Text style={styles.uploadText}>Upload Photos</Text>
         </View>
-
       </TouchableOpacity>
     
       <ScrollView contentContainerStyle={styles.photoContainer} horizontal>
@@ -135,6 +131,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 30,
+    position: 'relative',
   },
   coverPhoto: {
     width: 150,
@@ -142,55 +139,19 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     backgroundColor: '#e1e1e1',
   },
-  coverPhotoLabel: {
+  iconContainer: {
     position: 'absolute',
-    top: 25,
-    left: 5,
-    backgroundColor: 'white',
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderRadius: 6,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  menuButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: colors.white,
-    marginHorizontal: 12,
-    marginVertical: 10,
-    padding: 5,
-    borderRadius: 20,
-  },
-  dropdownMenu: {
-    position: 'absolute',
-    top: 35,
+    bottom: 0,
     right: 0,
-    width: 120,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    zIndex: 1,
-  },
-  dropdownItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-  },
-  dropdownItemText: {
-    marginLeft: 10,
-    fontSize: 16,
+    backgroundColor: 'grey',
+    borderRadius: 12,
+    padding: 4,
   },
   uploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 90,
+    paddingVertical: 15,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.gray,
@@ -201,17 +162,10 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     fontSize: 16,
-    marginLeft: 60,
-    backgroundColor: colors.white,
-    padding: 15,
-    width: 200,
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.gray,
   },
   uploadText: {
     fontSize: 17,
@@ -228,7 +182,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   nextButton: {
-    backgroundColor: '#ECEFFD',
+    backgroundColor: '#4460EF',
     paddingVertical: 15,
     borderRadius: 5,
     alignItems: 'center',
@@ -240,8 +194,6 @@ const styles = StyleSheet.create({
   },
   BackButton: {
     backgroundColor: colors.white,
-    marginTop: 5,
-    left: -3,
     height: 50,
     width: 50,
     borderRadius: 25,

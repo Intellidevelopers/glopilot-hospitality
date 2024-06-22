@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 20,
   },
   nextButtonText: {
     color: '#fff',

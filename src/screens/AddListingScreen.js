@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../utils/colors';
-
-// Import the cover image from the assets folder
 import defaultCoverImage from '../assets/bg-image.jpg';
 
-const AddListingPhotoScreen = ({ navigation }) => {
-  const [coverPhoto, setCoverPhoto] = useState(defaultCoverImage); // Use the imported image as the default cover photo
+const AddListingPhotoScreen = ({ navigation, route }) => {
+  const { coverPhoto: initialCoverPhoto } = route.params || {};
+  const [coverPhoto, setCoverPhoto] = useState(initialCoverPhoto ? { uri: initialCoverPhoto } : defaultCoverImage);
   const [caption, setCaption] = useState('');
   const [photos, setPhotos] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+
+  useEffect(() => {
+    console.log('Initial cover photo URI:', initialCoverPhoto);
+    if (initialCoverPhoto) {
+      setCoverPhoto({ uri: initialCoverPhoto });
+    }
+  }, [initialCoverPhoto]);
 
   const pickCoverImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -27,8 +33,12 @@ const AddListingPhotoScreen = ({ navigation }) => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setCoverPhoto({ uri: result.uri });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedUri = result.assets[0].uri;
+      console.log('Selected cover image URI:', selectedUri);
+      setCoverPhoto({ uri: selectedUri });
+    } else {
+      console.log('No cover image selected or result was canceled.');
     }
   };
 
@@ -46,8 +56,12 @@ const AddListingPhotoScreen = ({ navigation }) => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setPhotos([...photos, result.uri]);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedUri = result.assets[0].uri;
+      console.log('Selected image URI:', selectedUri);
+      setPhotos([...photos, selectedUri]);
+    } else {
+      console.log('No image selected or result was canceled.');
     }
   };
 
@@ -70,47 +84,31 @@ const AddListingPhotoScreen = ({ navigation }) => {
         Photos help guests visualize their stay at your place. Begin with one and add more later if you like.
       </Text>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.coverPhotoContainer}>
+        <TouchableOpacity style={styles.coverPhotoContainer} onPress={pickCoverImage}>
           <Image source={coverPhoto} style={styles.coverPhoto} />
-          <Text style={styles.coverPhotoLabel}>COVER PHOTO</Text>
+          <Text style={styles.coverPhotoLabel}>Cover Photo</Text>
           <TouchableOpacity style={styles.menuButton} onPress={toggleDropdown}>
             <Ionicons name="ellipsis-vertical" size={24} color="#000" />
           </TouchableOpacity>
           {dropdownVisible && (
             <View style={styles.dropdownMenu}>
               <TouchableOpacity style={styles.dropdownItem}>
-                <Ionicons name="pencil-outline" size={18} color="#000" />
-                <Text style={styles.dropdownItemText}>Edit</Text>
+                <Ionicons name="trash-outline" size={20} color="#000" />
+                <Text style={styles.dropdownItemText}>Delete</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.dropdownItem}>
-                <Ionicons name="trash-outline" size={18} color="#000" />
-                <Text style={styles.dropdownItemText}>Delete</Text>
+                <Ionicons name="create-outline" size={20} color="#000" />
+                <Text style={styles.dropdownItemText}>Edit</Text>
               </TouchableOpacity>
             </View>
           )}
         </TouchableOpacity>
-
         <TextInput
           style={styles.captionInput}
-          placeholder="Enter Caption"
+          placeholder="Add a caption"
           value={caption}
           onChangeText={setCaption}
         />
-        <View style={{ flexDirection: 'row', width: 330, alignItems: 'center' }}>
-          <View style={{ flex: 1, width: 20, height: 1, backgroundColor: colors.gray }} />
-        </View>
-        <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-          <View style={styles.uploadButtonText}>
-            <Ionicons name="cloud-upload-outline" size={24} color="#4460EF" />
-            <Text style={styles.uploadText}>Upload Photos</Text>
-          </View>
-        </TouchableOpacity>
-
-        <ScrollView contentContainerStyle={styles.photoContainer} horizontal>
-          {photos.map((photo, index) => (
-            <Image key={index} source={{ uri: photo }} style={styles.photo} />
-          ))}
-        </ScrollView>
       </ScrollView>
       <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('AboutScreen')}>
         <Text style={styles.nextButtonText}>Next</Text>
@@ -125,13 +123,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 50,
     paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    marginRight: 10,
   },
   progressBarContainer: {
     height: 10,
@@ -159,8 +150,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    borderColor: '#d3d3d3',
-    backgroundColor: '#f9f9f9',
     marginBottom: 10,
     position: 'relative',
   },
@@ -219,6 +208,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 20,
+    width: '95%',
+    alignSelf: "center"
   },
   uploadButton: {
     flexDirection: 'row',
@@ -283,6 +274,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray,
     marginVertical: 10,
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
 });
 

@@ -5,9 +5,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DropdownMenu from '../../components/DropDownMenu';
 import * as Progress from 'react-native-progress'; // Import the progress bar library
 
-const HomeScreen = ({ navigation }) => {
+const CancellationPolicyScreen = ({ navigation }) => {
   const [propertyType, setPropertyType] = useState('');
-  const [selectedOption, setSelectedOption] = useState('Full Place');
+  const [selectedOption, setSelectedOption] = useState('Flexible');
   const [progress, setProgress] = useState(0.3); // Progress value between 0 and 1
 
   const handleNext = () => {
@@ -16,33 +16,27 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.Container}>
-      <TouchableOpacity style={styles.BackButton} onPress={() => navigation.navigate('HomePage')}>
-        <Ionicons name={"arrow-back-outline"} color={colors.secondary} size={25} />
-      </TouchableOpacity>
-      <Progress.Bar
-        progress={0.2}
-        width={300}
-        style={styles.progressBar}
-        color="#4460EF"
-      />
+      <View style={styles.Header}>
+       <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
+          <Ionicons name={"arrow-back-outline"} color={colors.secondary} size={25} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Cancellation Policy</Text>
+      </View>
 
       <View style={styles.Header}>
-        <Text style={styles.HeaderText} size={30}>What kind of place are you listing?</Text>
-        <Text style={styles.HeadText}>Property Type</Text>
-        <DropdownMenu />
+        <Text style={styles.HeaderBtmText} size={20}>Choose a cancellation policy</Text>
+        
       </View>
-      <Text style={styles.subtitle}>What will guests have?</Text>
-
       <TouchableOpacity
         style={styles.radioOption}
-        onPress={() => setSelectedOption('Full Place')}
+        onPress={() => setSelectedOption('Flexible')}
       >
         <View style={styles.radioCircle}>
-          {selectedOption === 'Full Place' && <View style={styles.selectedRb} />}
+          {selectedOption === 'Flexible' && <View style={styles.selectedRb} />}
         </View>
         <View style={styles.radioTextContainer}>
-          <Text style={styles.radioText}>Full Place</Text>
-          <Text style={styles.description}>Guests have the whole place to themselves. This usually includes a bedroom, bathroom.</Text>
+          <Text style={styles.radioText}>Flexible</Text>
+          <Text style={styles.description}>Get a full refund if canceled one day before check-in</Text>
         </View>
       </TouchableOpacity>
 
@@ -58,8 +52,8 @@ const HomeScreen = ({ navigation }) => {
           {selectedOption === 'Private Room' && <View style={styles.selectedRb} />}
         </View>
         <View style={styles.radioTextContainer}>
-          <Text style={styles.radioText}>Private Room</Text>
-          <Text style={styles.description}>Guests have their own private room for sleeping. Other areas could be shared.</Text>
+          <Text style={styles.radioText}>Flexible or Non-refundable</Text>
+          <Text style={styles.description}>In addition to Flexible, offer a non-refundable option where guests pay 10% less. You'll keep your payout regardless of when they cancel.</Text>
         </View>
       </TouchableOpacity>
       <View style={{flexDirection: 'row', width: 330, alignItems: 'center'}}>
@@ -67,14 +61,30 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <TouchableOpacity
         style={styles.radioOption}
-        onPress={() => setSelectedOption('Shared Room')}
+        onPress={() => setSelectedOption('Moderate')}
       >
         <View style={styles.radioCircle}>
-          {selectedOption === 'Shared Room' && <View style={styles.selectedRb} />}
+          {selectedOption === 'Moderate' && <View style={styles.selectedRb} />}
         </View>
         <View style={styles.radioTextContainer}>
-          <Text style={styles.radioText}>Shared Room</Text>
-          <Text style={styles.description}>Guests sleep in a bedroom or a common area that could be shared with others.</Text>
+          <Text style={styles.radioText}>Moderate</Text>
+          <Text style={styles.description}>Get a full refund if canceled within five days of arrival.</Text>
+        </View>
+      </TouchableOpacity>
+
+      <View style={{flexDirection: 'row', width: 330, alignItems: 'center'}}>
+        <View style={{flex: 1, width: 20, height: 1, backgroundColor: colors.gray}} />
+      </View>
+      <TouchableOpacity
+        style={styles.radioOption}
+        onPress={() => setSelectedOption('Moderate or Non-refundable')}
+      >
+        <View style={styles.radioCircle}>
+          {selectedOption === 'Moderate or Non-refundable' && <View style={styles.selectedRb} />}
+        </View>
+        <View style={styles.radioTextContainer}>
+          <Text style={styles.radioText}>Moderate or Non-refundable</Text>
+          <Text style={styles.description}>In addition to Moderate, offer a non-refundable option where guests pay 10% less. You'll keep your payout regardless of when they cancel.</Text>
         </View>
       </TouchableOpacity>
 
@@ -82,13 +92,13 @@ const HomeScreen = ({ navigation }) => {
         style={styles.nextButton}
         onPress={handleNext}
       >
-        <Text style={styles.nextButtonText}>Next</Text>
+        <Text style={styles.nextButtonText}>Save</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-export default HomeScreen;
+export default CancellationPolicyScreen;
 
 const styles = StyleSheet.create({
   Container: {
@@ -98,8 +108,8 @@ const styles = StyleSheet.create({
   },
   BackButton:{
     backgroundColor: colors.white,
-    marginTop: 45,
-    left: -137,
+    marginTop: 50,
+    left: -50,
     height: 50,
     width: 50,
     borderRadius: 25,
@@ -133,6 +143,8 @@ const styles = StyleSheet.create({
   },
   Header:{
     padding: 1,
+    flexDirection: "row",
+    marginBottom: 20
   },
   HeaderText:{
     left: -0,
@@ -141,23 +153,28 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginVertical: 5,
   },
-  HeadText:{
-    top: 19,
-    fontSize: 14,
+  headerText:{
+    top: 60,
+    fontSize: 20,
     fontWeight: "700",
-    left: -0,
+    left: -20,
+  },
+  HeaderBtmText:{
+    fontSize: 20,
+    fontWeight: "700",
+    left: -34,
+    marginBottom: -40
   },
   subtitle: {
     fontSize: 17,
     fontWeight: '600',
     marginBottom: 10,
     marginLeft: -155,
-    marginTop: -10
   },
   radioOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 10,
     padding: 16,
   },
   radioCircle: {
@@ -165,7 +182,7 @@ const styles = StyleSheet.create({
     width: 25,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.gray,
     alignItems: 'center',
     justifyContent: "center",
     marginRight: 10,
@@ -195,7 +212,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: -10,
+    marginVertical: 100,
     width: 310,
   },
   nextButtonText: {

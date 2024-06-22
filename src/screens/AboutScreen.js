@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginVertical: 230,
+    marginVertical: 160,
   },
   nextButtonText: {
     color: '#fff',

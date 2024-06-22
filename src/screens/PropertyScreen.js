@@ -2,11 +2,28 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { colors } from '../utils/colors';
 import * as Progress from 'react-native-progress';
-import StateDropDown from '../../components/StateDropDown';
-import CityDropDownMenu from '../../components/CityDropDownMenu';
-import CountryDropDownMenu from '../../components/CountryDropDownMenu';
+import Spinner from 'react-native-loading-spinner-overlay';
+import { colors } from '../utils/colors';
+
+// Example data (in a real app, use an appropriate dataset or API)
+const countries = ['USA', 'Canada', 'Mexico'];
+const states = {
+  'USA': ['California', 'New York', 'Texas'],
+  'Canada': ['Ontario', 'Quebec', 'British Columbia'],
+  'Mexico': ['Jalisco', 'Nuevo Leon', 'Chihuahua']
+};
+const cities = {
+  'California': ['Los Angeles', 'San Francisco', 'San Diego'],
+  'New York': ['New York City', 'Buffalo', 'Rochester'],
+  'Texas': ['Houston', 'Austin', 'Dallas'],
+  'Ontario': ['Toronto', 'Ottawa', 'Mississauga'],
+  'Quebec': ['Montreal', 'Quebec City', 'Laval'],
+  'British Columbia': ['Vancouver', 'Victoria', 'Richmond'],
+  'Jalisco': ['Guadalajara', 'Puerto Vallarta', 'Zapopan'],
+  'Nuevo Leon': ['Monterrey', 'San Nicolas', 'Guadalupe'],
+  'Chihuahua': ['Chihuahua City', 'Ciudad Juarez', 'Delicias']
+};
 
 const PropertyScreen = ({ navigation }) => {
   const [country, setCountry] = useState('');
@@ -15,17 +32,32 @@ const PropertyScreen = ({ navigation }) => {
   const [zipCode, setZipCode] = useState('');
   const [streetAddress, setStreetAddress] = useState('');
   const [aptSuite, setAptSuite] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const getLocation = async () => {
+    setLoading(true);
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission to access location was denied');
+      setLoading(false);
       return;
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    console.log(location);
-    // You can use reverse geocoding here to get the address from coordinates if needed
+    const { latitude, longitude } = location.coords;
+
+    // Reverse geocoding to get address from coordinates
+    let geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+    if (geocode.length > 0) {
+      const address = geocode[0];
+      setCountry(address.country);
+      setState(address.region);
+      setCity(address.city);
+      setZipCode(address.postalCode);
+      setStreetAddress(`${address.street} ${address.name}`);
+    }
+    setLoading(false);
   };
 
   const goToNextScreen = () => {
@@ -34,6 +66,11 @@ const PropertyScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Spinner
+        visible={loading}
+        textContent={'Loading...'}
+        textStyle={styles.spinnerTextStyle}
+      />
       <View style={styles.header}>
         <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
           <Ionicons name={"arrow-back-outline"} color={colors.secondary} size={25} />
@@ -66,18 +103,34 @@ const PropertyScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.CountryContainer}>
           <Text style={styles.label1}>Country</Text>
-          <CountryDropDownMenu />
+          <TextInput
+            style={styles.input}
+            placeholder="Your Country"
+            value={country}
+            onChangeText={setCountry}
+          />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>State</Text>
-          <StateDropDown />
+          <TextInput
+            style={styles.input}
+            placeholder="Your State"
+            value={state}
+            onChangeText={setState}
+          />
         </View>
 
         <View style={[styles.inputContainer, styles.row]}>
-          <View style={[styles.halfInputContainer, { marginRight: 10 }]}>
+          <View style={[styles.halfInput, { marginRight: 10 }]}>
             <Text style={styles.label}>City</Text>
-            <CityDropDownMenu />
+            <TextInput
+            style={styles.input}
+            placeholder="City"
+            value={city}
+            onChangeText={setCity}
+            items={state ? cities[state] : []}
+          />
           </View>
 
           <View style={styles.halfInputContainer}>
@@ -220,32 +273,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray,
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
+  halfInput:{
+    flex: 1,
+    height: 55,
   },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 8,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  CountryContainer: {
-    borderColor: colors.gray,
-    borderWidth: 1,
+  spinnerTextStyle: {
+    color: '#FFF'
   },
 });
 

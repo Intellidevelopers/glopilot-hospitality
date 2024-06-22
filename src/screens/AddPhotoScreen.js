@@ -8,7 +8,6 @@ const AddPhotoScreen = ({ navigation }) => {
   const [photos, setPhotos] = useState([]);
 
   const pickImage = async () => {
-    // Request permission to access media library
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
@@ -22,14 +21,18 @@ const AddPhotoScreen = ({ navigation }) => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setPhotos([...photos, result.uri]);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedUri = result.assets[0].uri;
+      console.log('Selected image URI:', selectedUri);
+      setPhotos([...photos, selectedUri]);
+    } else {
+      console.log('No image selected or result was canceled.');
     }
   };
 
   return (
     <View style={styles.container}>
-     <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
         <Ionicons name={"arrow-back-outline"} color={colors.secondary} size={25} />
       </TouchableOpacity>
 
@@ -44,8 +47,8 @@ const AddPhotoScreen = ({ navigation }) => {
 
       <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
         <View style={styles.uploadButtonText}>
-        <Ionicons name="cloud-upload-outline" size={24} color="#4460EF" />
-        <Text style={styles.uploadText}>Upload Photos</Text>
+          <Ionicons name="cloud-upload-outline" size={24} color="#4460EF" />
+          <Text style={styles.uploadText}>Upload Photos</Text>
         </View>
       </TouchableOpacity>
 
@@ -55,8 +58,11 @@ const AddPhotoScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity style={styles.skipButton} onPress={() => navigation.navigate('AddListingScreen')}>
-        <Text style={styles.skipButtonText}>Skip for now</Text>
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={() => navigation.navigate('AddListingScreen', { coverPhoto: photos[0] })}
+      >
+        <Text style={styles.skipButtonText}>Next</Text>
       </TouchableOpacity>
     </View>
   );
@@ -68,13 +74,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 50,
     paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    marginRight: 10,
   },
   progressBarContainer: {
     height: 10,
@@ -108,26 +107,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d3d3d3',
     backgroundColor: colors.white,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderWidth: 2,
   },
   uploadButtonText: {
     fontSize: 16,
     color: '#4460EF',
     marginLeft: 10,
-    backgroundColor: "#ECEFFD",
+    backgroundColor: '#ECEFFD',
     padding: 15,
     width: 200,
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 10,
   },
-  uploadText:{
+  uploadText: {
     fontSize: 17,
     color: '#4460EF',
-    fontWeight: "500",
+    fontWeight: '500',
   },
   photoContainer: {
     marginVertical: 20,
@@ -144,21 +143,21 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginVertical: 30
+    marginVertical: 30,
   },
   skipButtonText: {
     color: '#fff',
     fontSize: 18,
   },
-  BackButton:{
+  BackButton: {
     backgroundColor: colors.white,
     marginTop: 20,
     left: -3,
     height: 50,
     width: 50,
     borderRadius: 25,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.gray,
     marginVertical: 10,

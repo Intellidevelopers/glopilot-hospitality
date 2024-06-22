@@ -97,7 +97,7 @@ backgroundColor: '#4460EF',
 paddingVertical: 15,
 borderRadius: 5,
 alignItems: 'center',
-marginVertical: 350,
+marginVertical: 300,
 },
 nextButtonText: {
 color: '#fff',

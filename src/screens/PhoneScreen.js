@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { colors } from '../utils/colors';
 
 const PhoneScreen = ({ navigation }) => {
@@ -63,7 +62,7 @@ const PhoneScreen = ({ navigation }) => {
         style={styles.nextButton}
         onPress={() => {
           if (guestPermission !== null) {
-            navigation.navigate('HouseRules');
+            navigation.navigate('SettingScreen');
           } else {
             Alert.alert('Please select an option.');
           }
@@ -128,9 +127,9 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.secondary,
     marginBottom: 20,
-        fontWeight: "800"
+    fontWeight: "800"
   },
   radioContainer: {
     flexDirection: 'row',
@@ -142,7 +141,7 @@ const styles = StyleSheet.create({
   radioText: {
     fontSize: 16,
     marginLeft: 10,
-    fontWeight: "400"
+    fontWeight: "500"
   },
   nextButton: {
     backgroundColor: '#4460EF',

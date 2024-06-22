@@ -93,7 +93,7 @@ backgroundColor: '#4460EF',
 paddingVertical: 15,
 borderRadius: 5,
 alignItems: 'center',
-marginVertical: 300,
+marginVertical: 270,
 },
 nextButtonText: {
 color: '#fff',

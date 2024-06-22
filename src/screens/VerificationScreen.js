@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const VerificationScreen = ({ navigation }) => {
   const [code, setCode] = useState(['', '', '', '']);
+  const inputs = useRef([]);
 
   const handleChangeText = (index, value) => {
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
+
+    // Move to the next input
+    if (value && index < inputs.current.length - 1) {
+      inputs.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyPress = (index, key) => {
+    if (key === 'Backspace' && index > 0 && code[index] === '') {
+      inputs.current[index - 1].focus();
+    }
   };
 
   return (
@@ -19,17 +31,22 @@ const VerificationScreen = ({ navigation }) => {
 
       <Text style={styles.title}>Verification Code</Text>
       <Text style={styles.subtitle}>
-        We sent you the 4-digit code at +1 453 536 6897. Please enter the code below to verify your account.
+        We sent you the 4-digit code at <Text style={styles.phone}>+1 453 536 6897</Text>. Please enter the code below to verify your account.
       </Text>
 
       <View style={styles.codeContainer}>
         {code.map((digit, index) => (
           <TextInput
             key={index}
-            style={styles.codeInput}
+            ref={(ref) => (inputs.current[index] = ref)}
+            style={[
+              styles.codeInput,
+              { borderColor: digit ? '#4460EF' : '#ccc' }
+            ]}
             keyboardType="numeric"
             maxLength={1}
             onChangeText={(value) => handleChangeText(index, value)}
+            onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
             value={digit}
           />
         ))}
@@ -109,6 +126,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
+  phone:{
+    fontWeight: "700",
+    color: "black"
+  }
 });
 
 export default VerificationScreen;
